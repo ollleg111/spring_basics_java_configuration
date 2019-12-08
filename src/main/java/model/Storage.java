@@ -2,6 +2,8 @@ package model;
 
 import javax.persistence.*;
 import java.util.Arrays;
+import util.StringArrayToStringConverter;
+import java.util.Objects;
 
 /*
 CREATE TABLE STORAGE(
@@ -17,18 +19,11 @@ STORAGE_SIZE NUMBER NOT NULL
 @Table(name = "STORAGE")
 public class Storage {
     private long id;
-    private String[] formatSupported;
     private String storageCountry;
     private long storageSize;
-    private String formatSupportedToString;
+    private String[] formatSupported;
 
     public Storage() {
-    }
-
-    public Storage(String[] formatSupported, String storageCountry, long storageSize) {
-        this.formatSupported = formatSupported;
-        this.storageCountry = storageCountry;
-        this.storageSize = storageSize;
     }
 
     @Id
@@ -37,15 +32,6 @@ public class Storage {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "STORAGE_S")
     public long getId() {
         return id;
-    }
-
-    public String[] getFormatSupported() {
-        return formatSupported;
-    }
-
-    @Column(name = "FORMAT_SUPPORTED")
-    public String getFormatSupportedToString() {
-        return formatSupportedToString;
     }
 
     @Column(name = "STORAGE_COUNTRY")
@@ -58,6 +44,12 @@ public class Storage {
         return storageSize;
     }
 
+    @Column(name = "FORMAT_SUPPORTED")
+    @Convert(converter = StringArrayToStringConverter.class)
+    public String[] getFormatSupported() {
+        return formatSupported;
+    }
+
     public void setId(long id) {
         this.id = id;
     }
@@ -66,32 +58,12 @@ public class Storage {
         this.formatSupported = formatSupported;
     }
 
-    public void setFormatSupportedToString(String formatSupportedToString) {
-        this.formatSupportedToString = formatSupportedToString;
-    }
     public void setStorageCountry(String storageCountry) {
         this.storageCountry = storageCountry;
     }
 
     public void setStorageSize(long storageSize) {
         this.storageSize = storageSize;
-    }
-
-    public String formatSupportedToString() {
-        String str = Arrays.toString(formatSupported);
-        return str.substring(1, str.length() - 1);
-    }
-
-    public String[] formatSupportedToArray() {
-        return formatSupportedToString.split(", ");
-    }
-
-    public boolean isFormatSupported(String fileFormat) {
-        for (String str : formatSupported) {
-            if (str.equals(fileFormat))
-                return true;
-        }
-        return false;
     }
 
     @Override
@@ -103,16 +75,17 @@ public class Storage {
 
         if (id != storage.id) return false;
         if (storageSize != storage.storageSize) return false;
-        if (!Arrays.equals(formatSupported, storage.formatSupported)) return false;
-        return storageCountry.equals(storage.storageCountry);
+        if (!Objects.equals(storageCountry, storage.storageCountry))
+            return false;
+        return Arrays.equals(formatSupported, storage.formatSupported);
     }
 
     @Override
     public int hashCode() {
         int result = (int) (id ^ (id >>> 32));
-        result = 31 * result + Arrays.hashCode(formatSupported);
-        result = 31 * result + storageCountry.hashCode();
+        result = 31 * result + (storageCountry != null ? storageCountry.hashCode() : 0);
         result = 31 * result + (int) (storageSize ^ (storageSize >>> 32));
+        result = 31 * result + (formatSupported != null ? Arrays.hashCode(formatSupported) : 0);
         return result;
     }
 
@@ -120,9 +93,9 @@ public class Storage {
     public String toString() {
         return "Storage{" +
                 "id=" + id +
-                ", formatSupported=" + Arrays.toString(formatSupported) +
                 ", storageCountry='" + storageCountry + '\'' +
                 ", storageSize=" + storageSize +
+                ", formatSupported=" + Arrays.toString(formatSupported) +
                 '}';
     }
 }
