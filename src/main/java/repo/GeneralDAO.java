@@ -69,8 +69,8 @@ public class GeneralDAO<T> {
             tr = session.getTransaction();
             tr.begin();
 
-            Query query = session.createQuery(deleteString, typeParameterClass);
-            query.setParameter("id", id);
+            Query<T> query = session.createNativeQuery(deleteString, typeParameterClass);
+            query.setParameter(1, id);
 
             query.executeUpdate();
 

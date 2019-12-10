@@ -1,6 +1,5 @@
 package repo;
 
-import constants.Constants;
 import exceptions.BadRequestException;
 import model.File;
 import model.Storage;
@@ -17,6 +16,14 @@ import java.util.List;
 @Repository
 public class StorageDAO extends GeneralDAO<Storage> {
     private HibernateUtil hibernateUtil;
+
+    private static final String STORAGE_REQUEST_DELETE = "DELETE FROM STORAGE WHERE ID = ?";
+    private static final String FILES_REQUEST_FIND_BY_STORAGE_ID = "SELECT * FROM FILES WHERE STORAGE  = ?";
+    private static final String FIND_AMOUNT_OF_STORAGE = "SELECT STORAGE_SIZE FROM STORAGE WHERE ID = ?";
+    private static final String STORAGE_FILLED_VOLUME = "SELECT SUM(FILE_SIZE) FROM FILES WHERE STORAGE = ?";
+    private static final String SELECT_ALL_ID_FILES_FROM_STORAGE = "SELECT ID FROM FILES WHERE STORAGE = ?";
+    private static final String FILE_SIZE_REQUEST = "SELECT FILE_SIZE FROM FILES WHERE ID = ?";
+    private static final String GET_FORMAT_FROM_STORAGE = "SELECT FORMAT_SUPPORTED FROM STORAGE WHERE ID = ?";
 
     @Autowired
     public StorageDAO(HibernateUtil hibernateUtil) {
@@ -36,7 +43,7 @@ public class StorageDAO extends GeneralDAO<Storage> {
     }
 
     public void delete(long id) throws HibernateException {
-        super.delete(id, Constants.STORAGE_REQUEST_DELETE);
+        super.delete(id, STORAGE_REQUEST_DELETE);
     }
 
     @Override
@@ -47,8 +54,8 @@ public class StorageDAO extends GeneralDAO<Storage> {
     public List<File> filesList(long storageId) throws HibernateException {
         try (Session session = hibernateUtil.openSession()) {
 
-            Query<File> query = session.createQuery(Constants.FILES_REQUEST_FIND_BY_STORAGE_ID, File.class);
-            query.setParameter("id", storageId);
+            Query<File> query = session.createNativeQuery(FILES_REQUEST_FIND_BY_STORAGE_ID, File.class);
+            query.setParameter(1, storageId);
 
             return query.list();
         } catch (HibernateException e) {
@@ -59,8 +66,8 @@ public class StorageDAO extends GeneralDAO<Storage> {
 
     public long getStorageAmount(Storage storage) throws BadRequestException {
         try (Session session = hibernateUtil.openSession()) {
-            Query<Long> query = session.createQuery(Constants.FIND_AMOUNT_OF_STORAGE, Long.class);
-            query.setParameter("id", storage.getId());
+            Query<Long> query = session.createNativeQuery(FIND_AMOUNT_OF_STORAGE, Long.class);
+            query.setParameter(1, storage.getId());
 
             return query.getSingleResult();
         } catch (NoResultException e) {
@@ -72,8 +79,8 @@ public class StorageDAO extends GeneralDAO<Storage> {
     public long getFilledVolume(long id) throws HibernateException {
         try (Session session = hibernateUtil.openSession()) {
 
-            Query<Long> query = session.createQuery(Constants.STORAGE_FILLED_VOLUME, Long.class);
-            query.setParameter("storage", id);
+            Query<Long> query = session.createNativeQuery(STORAGE_FILLED_VOLUME, Long.class);
+            query.setParameter(1, id);
 
             return query.getSingleResult();
         } catch (HibernateException e) {
@@ -85,8 +92,8 @@ public class StorageDAO extends GeneralDAO<Storage> {
     public long getFileSize(long id) throws HibernateException {
         try (Session session = hibernateUtil.openSession()) {
 
-            Query<Long> query = session.createQuery(Constants.FILE_SIZE_REQUEST, Long.class);
-            query.setParameter("id", id);
+            Query<Long> query = session.createNativeQuery(FILE_SIZE_REQUEST, Long.class);
+            query.setParameter(1, id);
 
             return query.getSingleResult();
         } catch (HibernateException e) {
@@ -98,8 +105,8 @@ public class StorageDAO extends GeneralDAO<Storage> {
     public List<Long> getIdFileInStorage(long storageId) throws HibernateException {
         try (Session session = hibernateUtil.openSession()) {
 
-            Query<Long> query = session.createQuery(Constants.SELECT_ALL_ID_FILES_FROM_STORAGE, Long.class);
-            query.setParameter("id", storageId);
+            Query<Long> query = session.createNativeQuery(SELECT_ALL_ID_FILES_FROM_STORAGE, Long.class);
+            query.setParameter(1, storageId);
 
             return query.list();
         } catch (HibernateException e) {
@@ -112,8 +119,8 @@ public class StorageDAO extends GeneralDAO<Storage> {
     public List<String> getFormatFromStorage(long storageId) throws HibernateException {
         try (Session session = hibernateUtil.openSession()) {
 
-            Query<String> query = session.createQuery(Constants.GET_FORMAT_FROM_STORAGE, String.class);
-            query.setParameter("id", storageId);
+            Query<String> query = session.createNativeQuery(GET_FORMAT_FROM_STORAGE, String.class);
+            query.setParameter(1, storageId);
 
             return query.list();
         } catch (HibernateException e) {
