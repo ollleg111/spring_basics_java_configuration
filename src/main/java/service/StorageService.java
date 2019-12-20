@@ -129,7 +129,7 @@ public class StorageService {
 
     private void storageNullValidator(Storage storage) throws RuntimeException {
         if (storage == null) throw new BadRequestException("Storage does not exist in method" +
-                " storageValidator(Storage storage) from class " +
+                " storageNullValidator(Storage storage) from class " +
                 StorageService.class.getName());
     }
 
